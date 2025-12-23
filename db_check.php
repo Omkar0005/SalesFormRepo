@@ -1,0 +1,45 @@
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "sales_db";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Check columns
+$result = $conn->query("SHOW COLUMNS FROM sales_orders");
+$columns = [];
+while($row = $result->fetch_assoc()) {
+    $columns[] = $row['Field'];
+}
+
+echo "Columns: " . implode(", ", $columns) . "\n";
+
+// Add columns if missing
+$alter_sql = [];
+if (!in_array('delivery_type', $columns)) {
+    $alter_sql[] = "ADD COLUMN delivery_type VARCHAR(50) AFTER product_name";
+}
+if (!in_array('lead_source', $columns)) {
+    $alter_sql[] = "ADD COLUMN lead_source VARCHAR(100) AFTER delivery_type";
+}
+if (!in_array('created_at', $columns)) { // Check for timestamp
+    $alter_sql[] = "ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
+}
+
+if (!empty($alter_sql)) {
+    $sql = "ALTER TABLE sales_orders " . implode(", ", $alter_sql);
+    if ($conn->query($sql) === TRUE) {
+        echo "Table updated successfully\n";
+    } else {
+        echo "Error updating table: " . $conn->error . "\n";
+    }
+} else {
+    echo "Table already has required columns\n";
+}
+
+$conn->close();
+?>
