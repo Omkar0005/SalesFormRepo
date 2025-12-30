@@ -1,0 +1,35 @@
+# Avoid directory listing
+Options -Indexes
+
+# Prevent access to sensitive files
+<FilesMatch "^\.|\.php$|db\.php|auth\.php">
+    # Note: We still need to allow access to index.php etc. 
+    # This is just a reminder that these files are sensitive.
+</FilesMatch>
+
+# Force HTTPS
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# Protect PHP files from being viewed as text
+<Files *.php>
+    Order Deny,Allow
+    Allow from all
+</Files>
+
+# SPECIFIC PROTECTION: Prevent direct access to db.php and auth.php
+<Files "db.php">
+    Order Deny,Allow
+    Deny from all
+</Files>
+<Files "auth.php">
+    Order Deny,Allow
+    Deny from all
+</Files>
+# Note: Above "Deny from all" for db.php and auth.php is safe because 
+# they are included/required via PHP, which works locally on the server.
+# However, many hosts block this by default if it breaks sub-requests.
+# If you get a 403 error on the main site, remove the <Files "db.php"> blocks.

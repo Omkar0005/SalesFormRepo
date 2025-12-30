@@ -1,15 +1,7 @@
 <?php
 require_once 'auth.php';
 // export.php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "sales_db";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require_once 'db.php';
 
 // Logic to fetch orders similar to View Orders
 $sort_order = isset($_GET['sort']) && $_GET['sort'] == 'ASC' ? 'ASC' : 'DESC';
@@ -68,7 +60,7 @@ header('Content-Disposition: attachment; filename="sales_orders_export.csv"');
 $output = fopen('php://output', 'w');
 
 // Header Row
-fputcsv($output, ['ID', 'Date', 'Customer Name', 'Mobile', 'Product', 'Delivery Type', 'Lead Source', 'Color', 'Qty', 'Rate', 'GST %', 'MRP', 'Discount', 'Total Amount', 'Paid Amount', 'Pending Amount', 'Payment Term', 'Reminder Date', 'Delivery Status', 'Payment Status', 'Address', 'City']);
+fputcsv($output, ['ID', 'Date', 'Customer Name', 'Mobile', 'Product', 'Delivery Type', 'Lead Source', 'Gloves Size', 'Color', 'Qty', 'Rate', 'GST %', 'MRP', 'Discount', 'Total Amount', 'Paid Amount', 'Pending Amount', 'Payment Term', 'Reminder Date', 'Delivery Status', 'Payment Status', 'Address', 'City']);
 
 // Data Rows
 while ($row = $result->fetch_assoc()) {
@@ -80,6 +72,7 @@ while ($row = $result->fetch_assoc()) {
         $row['product_name'],
         $row['delivery_type'],
         $row['lead_source'],
+        $row['gloves_size'],
         $row['product_color'],
         $row['quantity'],
         $row['rate'],

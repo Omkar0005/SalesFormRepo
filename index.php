@@ -1,15 +1,6 @@
 <?php
 require_once 'auth.php';
-// Database Connection for Fetching Data
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "sales_db";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require_once 'db.php';
 
 // Logic for View Leads Filter
 $lead_counts = [];
@@ -386,6 +377,74 @@ $orders_result = $stmt->get_result();
             .left-panel, .right-panel { flex: auto; width: 100%; padding: 0; border: none; }
             .right-panel { margin-top: 2rem; border-top: 1px solid #e5e7eb; padding-top: 2rem; }
         }
+
+        /* --- Search Suggestions --- */
+        .search-container { position: relative; width: 100%; margin-bottom: 1.5rem; }
+        .search-results { 
+            position: absolute; 
+            top: 100%; 
+            left: 0; 
+            right: 0; 
+            background: white; 
+            border: 1px solid var(--border-color); 
+            border-top: none; 
+            z-index: 1000; 
+            max-height: 200px; 
+            overflow-y: auto; 
+            box-shadow: var(--shadow);
+            display: none;
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
+        .search-item { 
+            padding: 0.75rem; 
+            cursor: pointer; 
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 0.9rem;
+        }
+        .search-item:hover { background-color: #f3f4f6; }
+        .search-item .sub-info { font-size: 0.8rem; color: var(--text-muted); display: block; }
+
+        /* --- Multi-select Dropdown --- */
+        .multi-select {
+            position: relative;
+            width: 100%;
+        }
+        .select-box {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            background-color: var(--input-bg);
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .select-box:after {
+            content: "▼";
+            font-size: 0.6rem;
+            color: var(--text-muted);
+        }
+        .options-container {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            z-index: 100;
+            display: none;
+            box-shadow: var(--shadow);
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
+        .option-item {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .option-item:hover { background-color: #f3f4f6; }
+        .option-item input { margin-right: 0.5rem; }
     </style>
 </head>
 
@@ -415,12 +474,18 @@ $orders_result = $stmt->get_result();
                     <div class="left-panel">
                         <div class="section-title">Customer Details</div>
 
+                        <div class="search-container">
+                            <label>Search Existing Customer (Name or Mobile)</label>
+                            <input type="text" id="customer_search" placeholder="Type at least 3 characters..." autocomplete="off">
+                            <div id="search_results" class="search-results"></div>
+                        </div>
+
                         <div class="grid">
                             <div class="col-6">
                                 <label>Status</label>
                                 <div class="radio-group">
-                                    <label class="radio-label"><input type="radio" name="cust_type" value="Registered" onclick="toggleGST(true)"> Registered</label>
-                                    <label class="radio-label"><input type="radio" name="cust_type" value="Unregistered" checked onclick="toggleGST(false)"> Unregistered</label>
+                                    <label class="radio-label"><input type="radio" name="cust_type" id="type_registered" value="Registered" onclick="toggleGST(true)"> Registered</label>
+                                    <label class="radio-label"><input type="radio" name="cust_type" id="type_unregistered" value="Unregistered" checked onclick="toggleGST(false)"> Unregistered</label>
                                 </div>
                             </div>
                         </div>
@@ -542,11 +607,31 @@ $orders_result = $stmt->get_result();
                             </div>
                         </div>
 
+                        <div class="grid">
+                            <div class="col-12">
+                                <label>Gloves Size & Quantities</label>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <div style="flex: 1;">
+                                        <label style="font-size: 0.7rem; color: var(--text-muted);">Small</label>
+                                        <input type="number" name="size_small_qty" id="size_small_qty" value="0" min="0" oninput="calculateTotal()" placeholder="S Qty">
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label style="font-size: 0.7rem; color: var(--text-muted);">Medium</label>
+                                        <input type="number" name="size_medium_qty" id="size_medium_qty" value="0" min="0" oninput="calculateTotal()" placeholder="M Qty">
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label style="font-size: 0.7rem; color: var(--text-muted);">Large</label>
+                                        <input type="number" name="size_large_qty" id="size_large_qty" value="0" min="0" oninput="calculateTotal()" placeholder="L Qty">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
 
                         <div class="grid">
                             <div class="col-6">
-                                <label>Unit (Qty)</label>
-                                <input type="number" id="qty" name="qty" value="0" oninput="calculateTotal()">
+                                <label>Unit (Qty) [Sum of Sizes]</label>
+                                <input type="number" id="qty" name="qty" value="0" step="any" readonly style="background-color: #f3f4f6; cursor: default;">
                             </div>
                             <div class="col-6">
                                 <label>Rate</label>
@@ -572,7 +657,7 @@ $orders_result = $stmt->get_result();
                         <div class="grid">
                             <div class="col-6">
                                 <label>Discount</label>
-                                <input type="number" id="discount" name="discount" value="0" oninput="calculateTotal()">
+                                <input type="number" id="discount" name="discount" value="0" step="any" oninput="calculateTotal()">
                             </div>
                             <div class="col-6">
                                 <label>Total Amount</label>
@@ -662,6 +747,7 @@ $orders_result = $stmt->get_result();
                                 <th>City</th>
                                 <th>Address</th>
                                 <th>Lead Source</th>
+                                <th>Size</th>
                                 <th>Delivery Status</th>
                                 <th>Payment Status</th>
                                 <th>Total Amount</th>
@@ -681,6 +767,15 @@ $orders_result = $stmt->get_result();
                                         <td><?php echo htmlspecialchars($row['city']); ?></td>
                                         <td><?php echo htmlspecialchars($row['address_line1']); ?></td>
                                         <td><?php echo htmlspecialchars($row['lead_source']); ?></td>
+                                        <td>
+                                            <?php 
+                                            $sizes = [];
+                                            if(($row['size_small_qty'] ?? 0) > 0) $sizes[] = "S:" . $row['size_small_qty'];
+                                            if(($row['size_medium_qty'] ?? 0) > 0) $sizes[] = "M:" . $row['size_medium_qty'];
+                                            if(($row['size_large_qty'] ?? 0) > 0) $sizes[] = "L:" . $row['size_large_qty'];
+                                            echo !empty($sizes) ? implode(', ', $sizes) : htmlspecialchars($row['gloves_size'] ?? '-');
+                                            ?>
+                                        </td>
                                         <td>
                                             <select onchange="updateStatus(<?php echo $row['id']; ?>, this.value, 'status')" style="padding: 0.25rem; font-size: 0.85rem;">
                                                 <option value="New" <?php echo ($row['status'] == 'New' || $row['status'] == 'Pending') ? 'selected' : ''; ?>>New</option>
@@ -825,7 +920,14 @@ $orders_result = $stmt->get_result();
 
         // Logic 2: Auto Calculate Total & Discount
         function calculateTotal() {
-            let qty = parseFloat(document.getElementById('qty').value) || 0;
+            let s_qty = parseFloat(document.getElementById('size_small_qty').value) || 0;
+            let m_qty = parseFloat(document.getElementById('size_medium_qty').value) || 0;
+            let l_qty = parseFloat(document.getElementById('size_large_qty').value) || 0;
+            
+            let total_qty = s_qty + m_qty + l_qty;
+            document.getElementById('qty').value = total_qty;
+
+            let qty = total_qty;
             let rate = parseFloat(document.getElementById('rate').value) || 0;
             let mrp = parseFloat(document.getElementsByName('mrp')[0].value) || 0; 
             let gstPer = parseFloat(document.getElementById('gst_percent').value) || 0;
@@ -982,6 +1084,89 @@ $orders_result = $stmt->get_result();
             const modal = document.getElementById('payment_modal');
             if (event.target == modal) {
                 closeModal();
+            }
+
+            // Close size options if clicked outside
+            const multiSelect = document.getElementById('gloves_size_multi');
+            const options = document.getElementById('size_options');
+            if (!multiSelect.contains(event.target)) {
+                options.style.display = 'none';
+            }
+        }
+
+        // Logic 7: Customer Search
+        const searchInput = document.getElementById('customer_search');
+        const resultsDiv = document.getElementById('search_results');
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            if (query.length < 3) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+
+            fetch('search_customer.php?q=' + encodeURIComponent(query))
+                .then(response => response.json())
+                .then(data => {
+                    resultsDiv.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(cust => {
+                            const item = document.createElement('div');
+                            item.className = 'search-item';
+                            item.innerHTML = `<strong>${cust.customer_name}</strong> <span class="sub-info">${cust.mobile1} | ${cust.city}</span>`;
+                            item.onclick = function() {
+                                fillForm(cust);
+                                resultsDiv.style.display = 'none';
+                                searchInput.value = '';
+                            };
+                            resultsDiv.appendChild(item);
+                        });
+                        resultsDiv.style.display = 'block';
+                    } else {
+                        resultsDiv.style.display = 'none';
+                    }
+                });
+        });
+
+        function fillForm(cust) {
+            // Fill common fields
+            document.querySelector('input[name="name"]').value = cust.customer_name;
+            document.querySelector('input[name="addr1"]').value = cust.address_line1;
+            document.querySelector('input[name="addr2"]').value = cust.address_line2;
+            document.querySelector('input[name="landmark"]').value = cust.landmark;
+            document.querySelector('input[name="city"]').value = cust.city;
+            document.querySelector('input[name="state"]').value = cust.state;
+            document.querySelector('input[name="pincode"]').value = cust.pincode;
+            document.querySelector('input[name="email"]').value = cust.email;
+            document.querySelector('input[name="mob1"]').value = cust.mobile1;
+            document.querySelector('input[name="mob2"]').value = cust.mobile2;
+
+            // Handle Customer Type and GST
+            if (cust.customer_type === 'Registered') {
+                document.getElementById('type_registered').checked = true;
+                toggleGST(true);
+                document.querySelector('input[name="gst_no"]').value = cust.gst_no;
+            } else {
+                document.getElementById('type_unregistered').checked = true;
+                toggleGST(false);
+            }
+        }
+
+        // Logic 8: Multi-select Dropdown
+        function toggleOptions() {
+            const options = document.getElementById('size_options');
+            options.style.display = options.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function updateSelectedSizes() {
+            const checkboxes = document.querySelectorAll('input[name="gloves_size[]"]:checked');
+            const selectedText = document.getElementById('selected_sizes_text');
+            const values = Array.from(checkboxes).map(cb => cb.value);
+            
+            if (values.length > 0) {
+                selectedText.textContent = values.join(', ');
+            } else {
+                selectedText.textContent = 'Select sizes...';
             }
         }
     </script>

@@ -1,18 +1,6 @@
 <?php
 require_once 'auth.php';
-// 1. Database Configuration
-$servername = "localhost";
-$username = "root"; 
-$password = "";     
-$dbname = "sales_db";
-
-// 2. Create Connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require_once 'db.php';
 
 // 3. Process Form Data
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -48,6 +36,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $lead_source = trim($_POST['lead_source'] ?? '');
     $color = trim($_POST['color'] ?? '');
     
+    // Capture Gloves Size Quantities
+    $s_qty = intval($_POST['size_small_qty'] ?? 0);
+    $m_qty = intval($_POST['size_medium_qty'] ?? 0);
+    $l_qty = intval($_POST['size_large_qty'] ?? 0);
+
+    // Create summary string for gloves_size column (backward compatibility)
+    $sizes = [];
+    if($s_qty > 0) $sizes[] = "S:$s_qty";
+    if($m_qty > 0) $sizes[] = "M:$m_qty";
+    if($l_qty > 0) $sizes[] = "L:$l_qty";
+    $gloves_size = implode(', ', $sizes);
+    
     $qty = intval($_POST['qty'] ?? 0);
     $rate = floatval($_POST['rate'] ?? 0);
     $gst_percent = floatval($_POST['gst_percent'] ?? 0);
@@ -67,9 +67,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // 4. Insert Data
     $sql = "INSERT INTO sales_orders 
             (customer_type, gst_no, customer_name, address_line1, address_line2, landmark, city, state, pincode, 
-            email, mobile1, mobile2, product_name, delivery_type, lead_source, product_color, quantity, rate, gst_percent, mrp, discount, total_amount, 
+            email, mobile1, mobile2, product_name, delivery_type, lead_source, product_color, gloves_size, 
+            size_small_qty, size_medium_qty, size_large_qty,
+            quantity, rate, gst_percent, mrp, discount, total_amount, 
             payment_term, payment_reminder_date, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; 
 
     $stmt = $conn->prepare($sql);
     
@@ -77,14 +79,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Error preparing statement: " . $conn->error);
     }
     
-    // Bind Params: 25 items
-    // Previous (22): ssssssssssssssssiidddd
-    // New (3): s (term), s (reminder date used as string in bind), s (status)
-    // New Types: ssssssssssssssssiiddddsss
-
-    $stmt->bind_param("ssssssssssssssssiiddddsss", 
+    // Bind Params: 29 items (17s + 5i + 4d + 3s)
+    // Types: sssss sssss sssss ss iiii i dddd sss
+    $stmt->bind_param("sssssssssssssssssiiiiiddddsss", 
         $cust_type, $gst_no, $name, $addr1, $addr2, $landmark, $city, $state, $pincode, 
-        $email, $mob1, $mob2, $product, $delivery_type, $lead_source, $color, $qty, $rate, $gst_percent, $mrp, $discount, $total,
+        $email, $mob1, $mob2, $product, $delivery_type, $lead_source, $color, $gloves_size,
+        $s_qty, $m_qty, $l_qty,
+        $qty, $rate, $gst_percent, $mrp, $discount, $total,
         $payment_term, $payment_reminder, $status
     );
 

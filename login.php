@@ -10,15 +10,7 @@ if (isset($_SESSION['user_id'])) {
 $error = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "sales_db";
-
-    $conn = new mysqli($servername, $username, $password, $dbname);
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
+    require_once 'db.php';
 
     $form_user = $_POST['username'] ?? '';
     $form_pass = $_POST['password'] ?? '';

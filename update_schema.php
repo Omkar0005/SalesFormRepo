@@ -1,15 +1,5 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "sales_db";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require_once 'db.php';
 
 // Add columns if missing
 $alter_sql = [];
@@ -43,6 +33,26 @@ $result = $conn->query("SHOW COLUMNS FROM sales_orders LIKE 'payment_status'");
 if ($result->num_rows == 0) {
     $alter_sql[] = "ADD COLUMN payment_status VARCHAR(50) DEFAULT 'Pending' AFTER status";
     // Migration Logic will be run via separate queries after structure update
+}
+
+// Check for gloves_size column
+$result = $conn->query("SHOW COLUMNS FROM sales_orders LIKE 'gloves_size'");
+if ($result->num_rows == 0) {
+    $alter_sql[] = "ADD COLUMN gloves_size VARCHAR(255) AFTER product_color";
+}
+
+// Check for size-specific quantity columns
+$result = $conn->query("SHOW COLUMNS FROM sales_orders LIKE 'size_small_qty'");
+if ($result->num_rows == 0) {
+    $alter_sql[] = "ADD COLUMN size_small_qty INT DEFAULT 0 AFTER gloves_size";
+}
+$result = $conn->query("SHOW COLUMNS FROM sales_orders LIKE 'size_medium_qty'");
+if ($result->num_rows == 0) {
+    $alter_sql[] = "ADD COLUMN size_medium_qty INT DEFAULT 0 AFTER size_small_qty";
+}
+$result = $conn->query("SHOW COLUMNS FROM sales_orders LIKE 'size_large_qty'");
+if ($result->num_rows == 0) {
+    $alter_sql[] = "ADD COLUMN size_large_qty INT DEFAULT 0 AFTER size_medium_qty";
 }
 
 if (!empty($alter_sql)) {

@@ -1,13 +1,5 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "sales_db";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require_once 'db.php';
 
 // Find orders with amount_paid > 0 but no history
 $sql = "SELECT id, amount_paid, created_at FROM sales_orders WHERE amount_paid > 0 AND id NOT IN (SELECT DISTINCT order_id FROM order_payments)";

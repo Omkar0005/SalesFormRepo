@@ -5,7 +5,12 @@
 ini_set('session.cookie_httponly', 1);
 ini_set('session.use_only_cookies', 1);
 ini_set('session.cookie_samesite', 'Strict');
-// ini_set('session.cookie_secure', 1); // Enable this if using HTTPS
+
+// Check if NOT localhost to enable secure cookies (requires HTTPS)
+$is_localhost_auth = (($_SERVER['HTTP_HOST'] ?? '') == 'localhost' || ($_SERVER['HTTP_HOST'] ?? '') == '127.0.0.1');
+if (!$is_localhost_auth) {
+    ini_set('session.cookie_secure', 1);
+}
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

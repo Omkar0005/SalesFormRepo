@@ -1,13 +1,5 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "sales_db";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require_once 'db.php';
 
 // Check columns
 $result = $conn->query("SHOW COLUMNS FROM sales_orders");
@@ -28,6 +20,9 @@ if (!in_array('lead_source', $columns)) {
 }
 if (!in_array('created_at', $columns)) { // Check for timestamp
     $alter_sql[] = "ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
+}
+if (!in_array('gloves_size', $columns)) {
+    $alter_sql[] = "ADD COLUMN gloves_size VARCHAR(255) AFTER product_color";
 }
 
 if (!empty($alter_sql)) {

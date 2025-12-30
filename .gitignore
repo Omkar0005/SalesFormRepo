@@ -1,0 +1,15 @@
+# Database Configuration (Contains Passwords!)
+db.php
+
+# Operating System Files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# PHP specific
+composer.lock
+vendor/
+
+# Temporary files
+*.tmp
+*.log

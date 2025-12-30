@@ -1,15 +1,7 @@
 <?php
 require_once 'auth.php';
 // get_payment_history.php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "sales_db";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die(json_encode(["error" => "Connection failed"]));
-}
+require_once 'db.php';
 
 $order_id = intval($_GET['order_id'] ?? 0);
 
