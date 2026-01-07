@@ -60,7 +60,7 @@ header('Content-Disposition: attachment; filename="sales_orders_export.csv"');
 $output = fopen('php://output', 'w');
 
 // Header Row
-fputcsv($output, ['ID', 'Creation Date', 'Order Date', 'Customer Name', 'Mobile', 'Product', 'Delivery Type', 'Lead Source', 'Gloves Size', 'Color', 'Qty', 'Rate', 'GST %', 'MRP', 'Discount', 'Total Amount', 'Paid Amount', 'Pending Amount', 'Payment Term', 'Reminder Date', 'Delivery Status', 'Payment Status', 'Address', 'City']);
+fputcsv($output, ['ID', 'Creation Date', 'Order Date', 'Customer Name', 'Mobile', 'Product', 'Delivery Type', 'Lead Source', 'Gloves Size', 'Color', 'Qty', 'Rate', 'GST %', 'MRP', 'Discount', 'Total Amount', 'Paid Amount', 'Pending Amount', 'Payment Term', 'Reminder Date', 'Delivery Status', 'Payment Status', 'Address', 'Area', 'City']);
 
 // Data Rows
 while ($row = $result->fetch_assoc()) {
@@ -88,6 +88,7 @@ while ($row = $result->fetch_assoc()) {
         $row['status'],
         $row['payment_status'],
         $row['address_line1'] . " " . $row['address_line2'],
+        $row['area'],
         $row['city']
     ]);
 }

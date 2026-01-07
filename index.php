@@ -529,14 +529,17 @@ $orders_result = $stmt->get_result();
                                 <label>Pincode</label>
                                 <input type="text" name="pincode" placeholder="Pincode" required>
                             </div>
+                            <div class="col-6">
+                                <label>Area</label>
+                                <input type="text" name="area" placeholder="Area / Locality">
+                            </div>
                         </div>
 
                         <div class="section-title mt-2">Contact Info</div>
                         <div class="grid">
                             <div class="col-4">
                                 <label>Email ID</label>
-                                <input type="email" name="email" placeholder="email@example.com" required> 
-                                <!-- Added required -->
+                                <input type="email" name="email" placeholder="email@example.com"> 
                             </div>
                             <div class="col-4">
                                 <label>Mobile 1 *</label>
@@ -759,6 +762,7 @@ $orders_result = $stmt->get_result();
                                 <th>Mobile Number</th>
                                 <th>Product</th>
                                 <th>City</th>
+                                <th>Area</th>
                                 <th>Address</th>
                                 <th>Lead Source</th>
                                 <th>Size</th>
@@ -780,6 +784,7 @@ $orders_result = $stmt->get_result();
                                         <td><?php echo htmlspecialchars($row['mobile1']); ?></td>
                                         <td><?php echo htmlspecialchars($row['product_name']); ?></td>
                                         <td><?php echo htmlspecialchars($row['city']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['area'] ?? '-'); ?></td>
                                         <td><?php echo htmlspecialchars($row['address_line1']); ?></td>
                                         <td><?php echo htmlspecialchars($row['lead_source']); ?></td>
                                         <td>
@@ -1161,6 +1166,7 @@ $orders_result = $stmt->get_result();
             document.querySelector('input[name="city"]').value = cust.city;
             document.querySelector('input[name="state"]').value = cust.state;
             document.querySelector('input[name="pincode"]').value = cust.pincode;
+            document.querySelector('input[name="area"]').value = cust.area || '';
             document.querySelector('input[name="email"]').value = cust.email;
             document.querySelector('input[name="mob1"]').value = cust.mobile1;
             document.querySelector('input[name="mob2"]').value = cust.mobile2;

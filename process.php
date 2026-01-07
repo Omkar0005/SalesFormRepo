@@ -22,9 +22,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $city = trim($_POST['city'] ?? '');
     $state = trim($_POST['state'] ?? '');
     $pincode = trim($_POST['pincode'] ?? '');
+    $area = trim($_POST['area'] ?? '');
     
-    $email = filter_var(trim($_POST['email'] ?? ''), FILTER_VALIDATE_EMAIL);
-    if (!$email) die("Invalid email format");
+    $email_input = trim($_POST['email'] ?? '');
+    $email = !empty($email_input) ? filter_var($email_input, FILTER_VALIDATE_EMAIL) : NULL;
+    if (!empty($email_input) && !$email) die("Invalid email format");
 
     $mob1 = preg_replace('/[^0-9]/', '', $_POST['mob1'] ?? '');
     if (strlen($mob1) !== 10) die("Invalid primary mobile number (10 digits required)");
@@ -70,12 +72,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // 4. Insert Data
     $sql = "INSERT INTO sales_orders 
-            (customer_type, gst_no, customer_name, address_line1, address_line2, landmark, city, state, pincode, 
+            (customer_type, gst_no, customer_name, address_line1, address_line2, landmark, city, state, pincode, area,
             email, mobile1, mobile2, product_name, delivery_type, lead_source, product_color, gloves_size, 
             size_small_qty, size_medium_qty, size_large_qty,
             quantity, rate, gst_percent, mrp, discount, total_amount, 
             payment_term, payment_reminder_date, order_date, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; 
 
     $stmt = $conn->prepare($sql);
     
@@ -83,10 +85,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Error preparing statement: " . $conn->error);
     }
     
-    // Bind Params: 30 items
-    // Types: sssss sssss sssss ss iiii i dddd ssss
-    $stmt->bind_param("sssssssssssssssssiiiiiddddssss", 
-        $cust_type, $gst_no, $name, $addr1, $addr2, $landmark, $city, $state, $pincode, 
+    // Bind Params: 31 items
+    // Types: sssss sssss sssss sss iiii i dddd ssss
+    $stmt->bind_param("ssssssssssssssssssiiiiiddddssss", 
+        $cust_type, $gst_no, $name, $addr1, $addr2, $landmark, $city, $state, $pincode, $area,
         $email, $mob1, $mob2, $product, $delivery_type, $lead_source, $color, $gloves_size,
         $s_qty, $m_qty, $l_qty,
         $qty, $rate, $gst_percent, $mrp, $discount, $total,

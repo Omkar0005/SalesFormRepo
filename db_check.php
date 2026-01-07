@@ -27,6 +27,9 @@ if (!in_array('gloves_size', $columns)) {
 if (!in_array('order_date', $columns)) {
     $alter_sql[] = "ADD COLUMN order_date DATE AFTER created_at";
 }
+if (!in_array('area', $columns)) {
+    $alter_sql[] = "ADD COLUMN area VARCHAR(100) AFTER pincode";
+}
 
 if (!empty($alter_sql)) {
     $sql = "ALTER TABLE sales_orders " . implode(", ", $alter_sql);
