@@ -62,6 +62,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $payment_term = trim($_POST['payment_term'] ?? '');
     $payment_reminder = $_POST['payment_reminder'] ?? NULL;
     if ($payment_reminder === "") $payment_reminder = NULL;
+    
+    $order_date = $_POST['order_date'] ?? date('Y-m-d');
+    if ($order_date === "") $order_date = date('Y-m-d');
+
     $status = "New"; // Default status
 
     // 4. Insert Data
@@ -70,8 +74,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             email, mobile1, mobile2, product_name, delivery_type, lead_source, product_color, gloves_size, 
             size_small_qty, size_medium_qty, size_large_qty,
             quantity, rate, gst_percent, mrp, discount, total_amount, 
-            payment_term, payment_reminder_date, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; 
+            payment_term, payment_reminder_date, order_date, status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; 
 
     $stmt = $conn->prepare($sql);
     
@@ -79,14 +83,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Error preparing statement: " . $conn->error);
     }
     
-    // Bind Params: 29 items (17s + 5i + 4d + 3s)
-    // Types: sssss sssss sssss ss iiii i dddd sss
-    $stmt->bind_param("sssssssssssssssssiiiiiddddsss", 
+    // Bind Params: 30 items
+    // Types: sssss sssss sssss ss iiii i dddd ssss
+    $stmt->bind_param("sssssssssssssssssiiiiiddddssss", 
         $cust_type, $gst_no, $name, $addr1, $addr2, $landmark, $city, $state, $pincode, 
         $email, $mob1, $mob2, $product, $delivery_type, $lead_source, $color, $gloves_size,
         $s_qty, $m_qty, $l_qty,
         $qty, $rate, $gst_percent, $mrp, $discount, $total,
-        $payment_term, $payment_reminder, $status
+        $payment_term, $payment_reminder, $order_date, $status
     );
 
     if ($stmt->execute()) {

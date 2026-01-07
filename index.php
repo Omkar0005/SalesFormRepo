@@ -564,6 +564,10 @@ $orders_result = $stmt->get_result();
                                     <option value="QuNDis : Nitrile Disposable Gloves">QuNDis : Nitrile Disposable Gloves</option>
                                 </select>
                             </div>
+                            <div class="col-6">
+                                <label>Order Date</label>
+                                <input type="date" name="order_date" value="<?php echo date('Y-m-d'); ?>">
+                            </div>
                         </div>
                         
                         <!-- NEW FIELDS -->
@@ -598,6 +602,7 @@ $orders_result = $stmt->get_result();
                                     <option value="Akshata">Akshata</option>
                                     <option value="Lokesh">Lokesh</option>
                                     <option value="Satish">Satish</option>
+                                    <option value="Agent RAH">Agent RAH</option>
                                 </select>
                             </div>
                         </div>
@@ -749,6 +754,7 @@ $orders_result = $stmt->get_result();
                             <tr>
                                 <th>ID</th>
                                 <th>Creation Date</th>
+                                <th>Order Date</th>
                                 <th>Customer Name</th>
                                 <th>Mobile Number</th>
                                 <th>Product</th>
@@ -769,6 +775,7 @@ $orders_result = $stmt->get_result();
                                     <tr>
                                         <td><?php echo htmlspecialchars($row['id']); ?></td>
                                         <td><?php echo date('d-M-Y h:i A', strtotime($row['created_at'])); ?></td>
+                                        <td><?php echo !empty($row['order_date']) ? date('d-M-Y', strtotime($row['order_date'])) : '-'; ?></td>
                                         <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
                                         <td><?php echo htmlspecialchars($row['mobile1']); ?></td>
                                         <td><?php echo htmlspecialchars($row['product_name']); ?></td>
@@ -863,6 +870,7 @@ $orders_result = $stmt->get_result();
                             <option value="Akshata" <?php echo ($filter_lead_source == 'Akshata')?'selected':''; ?>>Akshata</option>
                             <option value="Lokesh" <?php echo ($filter_lead_source == 'Lokesh')?'selected':''; ?>>Lokesh</option>
                             <option value="Satish" <?php echo ($filter_lead_source == 'Satish')?'selected':''; ?>>Satish</option>
+                            <option value="Agent RAH" <?php echo ($filter_lead_source == 'Agent RAH')?'selected':''; ?>>Agent RAH</option>
                         </select>
                     </div>
                     <div class="col-2">

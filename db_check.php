@@ -24,6 +24,9 @@ if (!in_array('created_at', $columns)) { // Check for timestamp
 if (!in_array('gloves_size', $columns)) {
     $alter_sql[] = "ADD COLUMN gloves_size VARCHAR(255) AFTER product_color";
 }
+if (!in_array('order_date', $columns)) {
+    $alter_sql[] = "ADD COLUMN order_date DATE AFTER created_at";
+}
 
 if (!empty($alter_sql)) {
     $sql = "ALTER TABLE sales_orders " . implode(", ", $alter_sql);

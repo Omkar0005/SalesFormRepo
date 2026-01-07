@@ -13,3 +13,5 @@ vendor/
 # Temporary files
 *.tmp
 *.log
+
+.agent
