@@ -590,6 +590,14 @@ $orders_result = $stmt->get_result();
                                     <option value="Flipkart">Flipkart</option>
                                     <option value="Just dial">Just dial</option>
                                     <option value="India Mart">India Mart</option>
+                                    <option value="Bahadur">Bahadur</option>
+                                    <option value="Harddik">Harddik</option>
+                                    <option value="Shraddha">Shraddha</option>
+                                    <option value="Sheetal">Sheetal</option>
+                                    <option value="Sarika">Sarika</option>
+                                    <option value="Akshata">Akshata</option>
+                                    <option value="Lokesh">Lokesh</option>
+                                    <option value="Satish">Satish</option>
                                 </select>
                             </div>
                         </div>
@@ -847,6 +855,14 @@ $orders_result = $stmt->get_result();
                             <option value="Flipkart" <?php echo ($filter_lead_source == 'Flipkart')?'selected':''; ?>>Flipkart</option>
                             <option value="Just dial" <?php echo ($filter_lead_source == 'Just dial')?'selected':''; ?>>Just dial</option>
                             <option value="India Mart" <?php echo ($filter_lead_source == 'India Mart')?'selected':''; ?>>India Mart</option>
+                            <option value="Bahadur" <?php echo ($filter_lead_source == 'Bahadur')?'selected':''; ?>>Bahadur</option>
+                            <option value="Harddik" <?php echo ($filter_lead_source == 'Harddik')?'selected':''; ?>>Harddik</option>
+                            <option value="Shraddha" <?php echo ($filter_lead_source == 'Shraddha')?'selected':''; ?>>Shraddha</option>
+                            <option value="Sheetal" <?php echo ($filter_lead_source == 'Sheetal')?'selected':''; ?>>Sheetal</option>
+                            <option value="Sarika" <?php echo ($filter_lead_source == 'Sarika')?'selected':''; ?>>Sarika</option>
+                            <option value="Akshata" <?php echo ($filter_lead_source == 'Akshata')?'selected':''; ?>>Akshata</option>
+                            <option value="Lokesh" <?php echo ($filter_lead_source == 'Lokesh')?'selected':''; ?>>Lokesh</option>
+                            <option value="Satish" <?php echo ($filter_lead_source == 'Satish')?'selected':''; ?>>Satish</option>
                         </select>
                     </div>
                     <div class="col-2">
