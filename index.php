@@ -1,6 +1,7 @@
 <?php
 require_once 'auth.php';
 require_once 'db.php';
+require_once 'config_keys.php';
 
 // Logic for View Leads Filter
 $lead_counts = [];
@@ -1279,6 +1280,6 @@ $orders_result = $stmt->get_result();
     </div>
 
     <!-- Replace YOUR_GOOGLE_MAPS_API_KEY with your actual key -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=REMOVED_GOOGLE_KEY&libraries=places&callback=initAutocomplete" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=<?php echo GOOGLE_MAPS_API_KEY; ?>&libraries=places&callback=initAutocomplete" async defer></script>
 </body>
 </html>
