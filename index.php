@@ -445,6 +445,11 @@ $orders_result = $stmt->get_result();
         }
         .option-item:hover { background-color: #f3f4f6; }
         .option-item input { margin-right: 0.5rem; }
+
+        /* Google Autocomplete Suggestions Z-index fix */
+        .pac-container {
+            z-index: 10000 !important;
+        }
     </style>
 </head>
 
@@ -507,7 +512,7 @@ $orders_result = $stmt->get_result();
                         <div class="grid">
                             <div class="col-6">
                                 <label>Address Line 1</label>
-                                <input type="text" name="addr1" placeholder="Line 1" required>
+                                <input type="text" name="addr1" id="addr1" placeholder="Enter hospital name or address" required>
                             </div>
                             <div class="col-6">
                                 <label>Address Line 2</label>
@@ -531,7 +536,7 @@ $orders_result = $stmt->get_result();
                             </div>
                             <div class="col-6">
                                 <label>Area</label>
-                                <input type="text" name="area" placeholder="Area / Locality">
+                                <input type="text" name="area" id="area" placeholder="Area / Locality">
                             </div>
                         </div>
 
@@ -627,6 +632,10 @@ $orders_result = $stmt->get_result();
                             <div class="col-12">
                                 <label>Gloves Size & Quantities</label>
                                 <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <div style="flex: 1;">
+                                        <label style="font-size: 0.7rem; color: var(--text-muted);">Extra Small</label>
+                                        <input type="number" name="size_extra_small_qty" id="size_extra_small_qty" value="0" min="0" oninput="calculateTotal()" placeholder="XS Qty">
+                                    </div>
                                     <div style="flex: 1;">
                                         <label style="font-size: 0.7rem; color: var(--text-muted);">Small</label>
                                         <input type="number" name="size_small_qty" id="size_small_qty" value="0" min="0" oninput="calculateTotal()" placeholder="S Qty">
@@ -790,6 +799,7 @@ $orders_result = $stmt->get_result();
                                         <td>
                                             <?php 
                                             $sizes = [];
+                                            if(($row['size_extra_small_qty'] ?? 0) > 0) $sizes[] = "XS:" . $row['size_extra_small_qty'];
                                             if(($row['size_small_qty'] ?? 0) > 0) $sizes[] = "S:" . $row['size_small_qty'];
                                             if(($row['size_medium_qty'] ?? 0) > 0) $sizes[] = "M:" . $row['size_medium_qty'];
                                             if(($row['size_large_qty'] ?? 0) > 0) $sizes[] = "L:" . $row['size_large_qty'];
@@ -949,11 +959,12 @@ $orders_result = $stmt->get_result();
 
         // Logic 2: Auto Calculate Total & Discount
         function calculateTotal() {
+            let xs_qty = parseFloat(document.getElementById('size_extra_small_qty').value) || 0;
             let s_qty = parseFloat(document.getElementById('size_small_qty').value) || 0;
             let m_qty = parseFloat(document.getElementById('size_medium_qty').value) || 0;
             let l_qty = parseFloat(document.getElementById('size_large_qty').value) || 0;
             
-            let total_qty = s_qty + m_qty + l_qty;
+            let total_qty = xs_qty + s_qty + m_qty + l_qty;
             document.getElementById('qty').value = total_qty;
 
             let qty = total_qty;
@@ -1114,13 +1125,6 @@ $orders_result = $stmt->get_result();
             if (event.target == modal) {
                 closeModal();
             }
-
-            // Close size options if clicked outside
-            const multiSelect = document.getElementById('gloves_size_multi');
-            const options = document.getElementById('size_options');
-            if (!multiSelect.contains(event.target)) {
-                options.style.display = 'none';
-            }
         }
 
         // Logic 7: Customer Search
@@ -1199,6 +1203,71 @@ $orders_result = $stmt->get_result();
                 selectedText.textContent = 'Select sizes...';
             }
         }
+
+        // --- Google Places Autocomplete ---
+        function initAutocomplete() {
+            console.log("Initializing Google Places Autocomplete...");
+            const input = document.getElementById('addr1');
+            const options = {
+                types: ['establishment', 'geocode'],
+                componentRestrictions: { country: "in" } // Restrict to India
+            };
+
+            const autocomplete = new google.maps.places.Autocomplete(input, options);
+
+            autocomplete.addListener('place_changed', function() {
+                const place = autocomplete.getPlace();
+                
+                if (!place.address_components) {
+                    return;
+                }
+
+                // Reset fields
+                document.getElementsByName('addr2')[0].value = '';
+                document.getElementsByName('city')[0].value = '';
+                document.getElementsByName('state')[0].value = '';
+                document.getElementsByName('pincode')[0].value = '';
+                document.getElementById('area').value = '';
+
+                let address1 = "";
+                let area = "";
+
+                // Parsing Address Components
+                for (const component of place.address_components) {
+                    const type = component.types[0];
+
+                    switch (type) {
+                        case 'premise':
+                        case 'hospital':
+                        case 'point_of_interest':
+                            address1 = component.long_name;
+                            break;
+                        case 'sublocality_level_1':
+                        case 'sublocality':
+                            area = component.long_name;
+                            break;
+                        case 'locality':
+                            document.getElementsByName('city')[0].value = component.long_name;
+                            break;
+                        case 'administrative_area_level_1':
+                            document.getElementsByName('state')[0].value = component.long_name;
+                            break;
+                        case 'postal_code':
+                            document.getElementsByName('pincode')[0].value = component.long_name;
+                            break;
+                    }
+                }
+
+                // If it's a specific place (like a hospital), use the name as Addr1
+                if (place.name && !address1.includes(place.name)) {
+                    document.getElementById('addr1').value = place.name + (address1 ? ", " + address1 : "");
+                }
+                
+                if (area) {
+                    document.getElementById('area').value = area;
+                }
+            });
+        }
     </script>
 
     <div id="payment_modal" class="modal">
@@ -1209,5 +1278,7 @@ $orders_result = $stmt->get_result();
         </div>
     </div>
 
+    <!-- Replace YOUR_GOOGLE_MAPS_API_KEY with your actual key -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=REMOVED_GOOGLE_KEY&libraries=places&callback=initAutocomplete" async defer></script>
 </body>
 </html>

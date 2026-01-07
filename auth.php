@@ -20,7 +20,7 @@ if (session_status() === PHP_SESSION_NONE) {
 header("X-Frame-Options: DENY");
 header("X-Content-Type-Options: nosniff");
 header("Referrer-Policy: strict-origin-when-cross-origin");
-header("Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; script-src 'self' 'unsafe-inline';");
+header("Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://maps.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.google.com; img-src 'self' https://maps.gstatic.com https://maps.googleapis.com https://*.googleapis.com data:; connect-src 'self' https://maps.googleapis.com https://maps.google.com;");
 
 // 3. CSRF Token Generation
 if (!isset($_SESSION['csrf_token'])) {

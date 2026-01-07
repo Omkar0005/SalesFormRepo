@@ -42,9 +42,13 @@ if ($result->num_rows == 0) {
 }
 
 // Check for size-specific quantity columns
+$result = $conn->query("SHOW COLUMNS FROM sales_orders LIKE 'size_extra_small_qty'");
+if ($result->num_rows == 0) {
+    $alter_sql[] = "ADD COLUMN size_extra_small_qty INT DEFAULT 0 AFTER gloves_size";
+}
 $result = $conn->query("SHOW COLUMNS FROM sales_orders LIKE 'size_small_qty'");
 if ($result->num_rows == 0) {
-    $alter_sql[] = "ADD COLUMN size_small_qty INT DEFAULT 0 AFTER gloves_size";
+    $alter_sql[] = "ADD COLUMN size_small_qty INT DEFAULT 0 AFTER " . ($result->num_rows == 0 && !in_array("ADD COLUMN size_extra_small_qty INT DEFAULT 0 AFTER gloves_size", $alter_sql) ? "gloves_size" : "size_extra_small_qty");
 }
 $result = $conn->query("SHOW COLUMNS FROM sales_orders LIKE 'size_medium_qty'");
 if ($result->num_rows == 0) {

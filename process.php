@@ -39,12 +39,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $color = trim($_POST['color'] ?? '');
     
     // Capture Gloves Size Quantities
+    $xs_qty = intval($_POST['size_extra_small_qty'] ?? 0);
     $s_qty = intval($_POST['size_small_qty'] ?? 0);
     $m_qty = intval($_POST['size_medium_qty'] ?? 0);
     $l_qty = intval($_POST['size_large_qty'] ?? 0);
 
     // Create summary string for gloves_size column (backward compatibility)
     $sizes = [];
+    if($xs_qty > 0) $sizes[] = "XS:$xs_qty";
     if($s_qty > 0) $sizes[] = "S:$s_qty";
     if($m_qty > 0) $sizes[] = "M:$m_qty";
     if($l_qty > 0) $sizes[] = "L:$l_qty";
@@ -74,10 +76,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sql = "INSERT INTO sales_orders 
             (customer_type, gst_no, customer_name, address_line1, address_line2, landmark, city, state, pincode, area,
             email, mobile1, mobile2, product_name, delivery_type, lead_source, product_color, gloves_size, 
-            size_small_qty, size_medium_qty, size_large_qty,
+            size_extra_small_qty, size_small_qty, size_medium_qty, size_large_qty,
             quantity, rate, gst_percent, mrp, discount, total_amount, 
             payment_term, payment_reminder_date, order_date, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; 
 
     $stmt = $conn->prepare($sql);
     
@@ -85,12 +87,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Error preparing statement: " . $conn->error);
     }
     
-    // Bind Params: 31 items
-    // Types: sssss sssss sssss sss iiii i dddd ssss
-    $stmt->bind_param("ssssssssssssssssssiiiiiddddssss", 
+    // Bind Params: 32 items
+    // Types: sssss sssss sssss sss iiiii dddd ssss
+    $stmt->bind_param("ssssssssssssssssssiiiiiddddsssss", 
         $cust_type, $gst_no, $name, $addr1, $addr2, $landmark, $city, $state, $pincode, $area,
         $email, $mob1, $mob2, $product, $delivery_type, $lead_source, $color, $gloves_size,
-        $s_qty, $m_qty, $l_qty,
+        $xs_qty, $s_qty, $m_qty, $l_qty,
         $qty, $rate, $gst_percent, $mrp, $discount, $total,
         $payment_term, $payment_reminder, $order_date, $status
     );
